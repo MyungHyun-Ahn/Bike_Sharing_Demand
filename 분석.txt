@@ -1,3 +1,16 @@
 선형회귀분석 Linear_regression
 
 mse = 136.87282811741787
+
+
+
+Lasso 모델
+polynomial_regression 다항 회귀분석
+
+2차
+
+mse = 100.9114134622955
+
+4차
+
+mse = 102.64407250818077
