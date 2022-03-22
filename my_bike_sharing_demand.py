@@ -25,12 +25,15 @@ X['hour'] = X['datetime'].dt.hour
 # 요일 별 정보도 궁금하기 때문에 분류
 X['dayofweek'] = X['datetime'].dt.dayofweek
 
-f, ax = plt.subplots(nrows=5, figsize=(10, 20))
+f, ax = plt.subplots(nrows=5, figsize=(6, 12))
+plt.suptitle('Time Data Visualization')
+plt.subplots_adjust(left=0.125, bottom=0.1,  right=0.9, top=0.9, wspace=0.2, hspace=0.35)
 sns.barplot(data=X, y='count', x='year', ax=ax[0])
 sns.barplot(data=X, y='count', x='month', ax=ax[1])
 sns.barplot(data=X, y='count', x='day', ax=ax[2])
 sns.barplot(data=X, y='count', x='hour', ax=ax[3])
 sns.barplot(data=X, y='count', x='dayofweek', ax=ax[4])
+ax[4].set_xticklabels(['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'])
 plt.show()
 
 # 시간 정보 시각화 결과 : day는 거의 균일하고 19일 까지 밖에 없기 때문에 분석에 관련이 없어보임 >> 삭제
@@ -52,11 +55,11 @@ plt.show()
 # 산점도 그래프 그리기
 
 f, ax = plt.subplots(2, 2, figsize=(10, 10))
-
-sns.scatterplot(data=X, x='temp', y='count', ax=ax[0, 0])
-sns.scatterplot(data=X, x='atemp', y='count', ax=ax[0, 1])
-sns.scatterplot(data=X, x='humidity', y='count', ax=ax[1, 0])
-sns.scatterplot(data=X, x='windspeed', y='count', ax=ax[1, 1])
+plt.suptitle('Quantitative Variable Visualization')
+sns.scatterplot(data=X, x='temp', y='count', color='r', ax=ax[0, 0])
+sns.scatterplot(data=X, x='atemp', y='count', color='g', ax=ax[0, 1])
+sns.scatterplot(data=X, x='humidity', y='count', color='b', ax=ax[1, 0])
+sns.scatterplot(data=X, x='windspeed', y='count', color='y', ax=ax[1, 1])
 
 plt.show()
 
@@ -192,6 +195,47 @@ ridge_m2_scores = np.sqrt(-1 * ridge_m2_scores)
 ridge_m2_scores.mean() # 107.46983050400426
 
 
+# 블로그 보고 한 것 선형 회귀
 
+def rmsle(predicted_values, actual_values, convertExp=True):
+    if convertExp:
+        predicted_values = np.exp(predicted_values),
+        actual_values = np.exp(actual_values)
+    
+    predicted_values = np.array(predicted_values)
+    actual_values = np.array(actual_values)
 
+    log_predict = np.log(predicted_values + 1)
+    log_actual = np.log(actual_values + 1)
 
+    difference = log_predict - log_actual
+    difference = np.square(difference)
+
+    mean_difference = difference.mean()
+
+    score = np.sqrt(mean_difference)
+
+    return score
+
+from sklearn.model_selection import GridSearchCV
+from sklearn import metrics
+import warnings
+pd.options.mode.chained_assignment = None
+warnings.filterwarnings('ignore', category=DeprecationWarning)
+
+y_train_log = np.log1p(y)
+b_r_model = LinearRegression()
+
+b_r_model.fit(X, y_train_log)
+
+b_r_model_predict = b_r_model.predict(X)
+print('RMSLE Value For Linear Regression: ', rmsle(np.exp(y_train_log), np.exp(b_r_model_predict), False))
+
+from sklearn.ensemble import RandomForestRegressor
+rfModel = RandomForestRegressor(n_estimators=100)
+
+y_train_log = np.log1p(y)
+rfModel.fit(X,y_train_log.values.ravel())
+preds = rfModel.predict(X)
+score = rmsle(np.exp(y_train_log), np.exp(preds), False)
+print("RMSLE Value For Random Forest: ", score)
