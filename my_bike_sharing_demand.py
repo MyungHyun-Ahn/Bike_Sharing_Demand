@@ -6,6 +6,7 @@ import pandas as pd
 import numpy as np
 
 from math import sqrt
+
 TRAIN_FILE_PATH = 'data/train.csv'
 X = pd.read_csv(TRAIN_FILE_PATH, parse_dates=['datetime'])
 
@@ -26,14 +27,21 @@ X['hour'] = X['datetime'].dt.hour
 X['dayofweek'] = X['datetime'].dt.dayofweek
 
 f, ax = plt.subplots(nrows=5, figsize=(6, 12))
+
 plt.suptitle('Time Data Visualization')
+
+# x 라벨이 가려져서 간격 조정
 plt.subplots_adjust(left=0.125, bottom=0.1,  right=0.9, top=0.9, wspace=0.2, hspace=0.35)
+
 sns.barplot(data=X, y='count', x='year', ax=ax[0])
 sns.barplot(data=X, y='count', x='month', ax=ax[1])
 sns.barplot(data=X, y='count', x='day', ax=ax[2])
 sns.barplot(data=X, y='count', x='hour', ax=ax[3])
 sns.barplot(data=X, y='count', x='dayofweek', ax=ax[4])
+
+# 요일 x 라벨을 숫자보다는 보기 편하게 영문으로 바꾸어줌
 ax[4].set_xticklabels(['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'])
+
 plt.show()
 
 # 시간 정보 시각화 결과 : day는 거의 균일하고 19일 까지 밖에 없기 때문에 분석에 관련이 없어보임 >> 삭제
@@ -55,7 +63,9 @@ plt.show()
 # 산점도 그래프 그리기
 
 f, ax = plt.subplots(2, 2, figsize=(10, 10))
+
 plt.suptitle('Quantitative Variable Visualization')
+
 sns.scatterplot(data=X, x='temp', y='count', color='r', ax=ax[0, 0])
 sns.scatterplot(data=X, x='atemp', y='count', color='g', ax=ax[0, 1])
 sns.scatterplot(data=X, x='humidity', y='count', color='b', ax=ax[1, 0])
@@ -78,6 +88,7 @@ feature_list = ['windspeed', 'humidity', 'temp', 'atemp', 'count']
 for name in feature_list:
     q1 = X[name].quantile(0.25)
     q3 = X[name].quantile(0.75)
+
     IQR = q3 - q1
 
     outlier = (X[name] > (q3 + 1.5 * IQR)) | (X[name] < (q1 - 1.5 * IQR))
@@ -110,7 +121,10 @@ X.drop(['casual', 'registered'], axis='columns', inplace=True)
 # datetime 데이터는 년 월 날짜 시간으로 분류하여 저장하였기 때문에 삭제
 X.drop('datetime', axis='columns', inplace=True)
 
+# y 데이터 프레임을 만들어서 target 변수인 'count' 컬럼을 만들어 넣어줌
 y = pd.DataFrame(X['count'], columns=['count'])
+
+# X 데이터 프레임에서는 target 변수인 'count' 컬럼을 지워줌
 X.drop('count', axis='columns', inplace=True)
 
 from sklearn.model_selection import cross_val_score, train_test_split
@@ -118,12 +132,17 @@ from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error
 from sklearn.model_selection import cross_val_score, StratifiedKFold
 
+# 간단히 모델 평가를 해보기 위한 train 셋과 test 셋 분류
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
 
+# 잘 분류가 되었는지 확인
 X_train.shape
 X_test.shape
 y_train.shape
 y_test.shape
+
+# 회귀 모델
+
 # 선형 회귀 모델 평균 제곱의 오차
 linear_m = LinearRegression()
 
@@ -167,30 +186,142 @@ poly_m2_scores = cross_val_score(poly_m2, poly_X, y, scoring="neg_mean_squared_e
 poly_m2_scores = np.sqrt(-1 * poly_m2_scores)
 poly_m2_scores.mean() # 113.6581596110982
 
+# L1 정규화를 위한 Lasso 모델
 from sklearn.linear_model import Lasso
-
+# Lasso 평균 제곱 오차
 lasso_m = Lasso(alpha=1, max_iter=2000, normalize=True)
 lasso_m.fit(poly_X_train, poly_y_train)
 lasso_y_test_predict = lasso_m.predict(poly_X_test)
 lasso_y_test_predict
 lasso_mse = sqrt(mean_squared_error(y_test, lasso_y_test_predict))
 lasso_mse # 157.59495896539266
-
+# Lasso k-fold
 lasso_m2 = Lasso(alpha=1, max_iter=2000, normalize=True)
 lasso_m2_scores = cross_val_score(lasso_m2, poly_X, y, scoring="neg_mean_squared_error", cv=5)
 lasso_m2_scores = np.sqrt(-1 * lasso_m2_scores)
 lasso_m2_scores.mean() # 159.61076851182779
-
+# L2 정규화를 위한 Ridge 모델
 from sklearn.linear_model import Ridge
-
+# Ridge 평균 제곱 오차
 ridge_m = Ridge(alpha=0.01, max_iter=3000, normalize=True)
 ridge_m.fit(poly_X_train, poly_y_train)
 ridge_y_test_predict = lasso_m.predict(poly_X_test)
 ridge_y_test_predict
 ridge_mse = sqrt(mean_squared_error(y_test, ridge_y_test_predict))
 ridge_mse # 157.59495896539266
-
+# Ridge k-fold
 ridge_m2 = Ridge(alpha=0.01, max_iter=2000, normalize=True)
 ridge_m2_scores = cross_val_score(ridge_m2, poly_X, y, scoring="neg_mean_squared_error", cv=5)
 ridge_m2_scores = np.sqrt(-1 * ridge_m2_scores)
 ridge_m2_scores.mean() # 107.46983050400426
+
+# 앙상블 모델
+# 그라디언트 부스트 모델
+from sklearn.ensemble import GradientBoostingRegressor
+
+# GradientBoosting 평균 제곱 오차
+GB_m = GradientBoostingRegressor(n_estimators=4000, alpha=0.01)
+GB_m.fit(X_train, y_train.values.ravel())
+GB_y_test_predict = GB_m.predict(X_test)
+GB_mse = sqrt(mean_squared_error(y_test, GB_y_test_predict))
+GB_mse # 41.4939563124132
+
+# GradientBoosting k-fold
+GB_m2 = GradientBoostingRegressor(n_estimators=4000, alpha=0.01)
+GB_m2_scores = cross_val_score(GB_m2, X, y.values.ravel(), scoring="neg_mean_squared_error", cv=5)
+GB_m2_scores = np.sqrt(-1 * GB_m2_scores)
+GB_m2_scores.mean() # 62.47338661764495
+
+# 랜덤 포레스트 모델
+from sklearn.ensemble import RandomForestRegressor
+
+# RandomForest 평균 제곱 오차
+RF_m = RandomForestRegressor(n_estimators=100)
+RF_m.fit(X_train, y_train.values.ravel())
+RF_y_test_predict = RF_m.predict(X_test)
+RF_y_test_predict
+RF_mse = sqrt(mean_squared_error(y_test, RF_y_test_predict))
+RF_mse # 43.493486694299925
+
+# RandomForest k-fold
+RF_m2 = RandomForestRegressor(n_estimators=100)
+RF_m2_scores = cross_val_score(RF_m2, X, y.values.ravel(), scoring="neg_mean_squared_error", cv=5) 
+RF_m2_scores = np.sqrt(-1 * RF_m2_scores)
+RF_m2_scores.mean() # 73.21367394254486
+
+# 에다부스트
+from sklearn.ensemble import AdaBoostRegressor
+
+# AdaBoosting 평균 제곱 오차
+AB_m = AdaBoostRegressor(n_estimators=100)
+AB_m.fit(X_train, y_train)
+AB_y_test_predict = AB_m.predict(X_test)
+AB_mse = sqrt(mean_squared_error(y_test, AB_y_test_predict))
+AB_mse # 116.34704534569923
+
+# AdaBoosting k-fold
+AB_m2 = AdaBoostRegressor(n_estimators=100)
+AB_m2_scores = cross_val_score(AB_m2, X, y.values.ravel(), scoring="neg_mean_squared_error", cv=5) 
+AB_m2_scores = np.sqrt(-1 * AB_m2_scores)
+AB_m2_scores.mean() # 122.89016076704408
+
+# 배깅 Bagging
+from sklearn.ensemble import BaggingRegressor
+
+# Bagging 평균 제곱 오차
+BG_m = BaggingRegressor(n_estimators=100)
+BG_m.fit(X_train, y_train)
+BG_y_test_predict = BG_m.predict(X_test)
+BG_mse = sqrt(mean_squared_error(y_test, BG_y_test_predict))
+BG_mse # 45.717563391405406
+
+# Bagging k-fold
+BG_m2 = BaggingRegressor(n_estimators=100)
+BG_m2_scores = cross_val_score(BG_m2, X, y.values.ravel(), scoring="neg_mean_squared_error", cv=5)
+BG_m2_scores = np.sqrt(-1 * BG_m2_scores)
+BG_m2_scores.mean() # 72.99775759783618
+
+rmse_model_score_dict = {
+    '선형 회귀 모델' : 124,
+    '2차항 회귀 모델' : 100,
+    'Lasso 모델' : 157,
+    'Ridge 모델' : 157,
+    'GradientBoosting 모델' :  41,
+    'RandomForest 모델' : 43,
+    'AdaBoosting 모델' : 116,
+    'Bagging 모델' : 45
+}
+
+
+sorted(rmse_model_score_dict.items(), key=lambda x:x[1])
+# ('GradientBoosting 모델', 41), 
+# ('RandomForest 모델', 43), 
+# ('Bagging 모델', 45), 
+# ('2차항 회귀 모델', 100), 
+# ('AdaBoosting 모델', 116), 
+# ('선형 회귀 모델', 124), 
+# ('Lasso 모델', 157), 
+# ('Ridge 모델', 157)
+
+k_fold_model_score_dict = {
+    '선형 회귀 모델' : 123,
+    '2차항 회귀 모델' : 113,
+    'Lasso 모델' : 159,
+    'Ridge 모델' : 107,
+    'GradientBoosting 모델' :  62,
+    'RandomForest 모델' : 73,
+    'AdaBoosting 모델' : 122,
+    'Bagging 모델' : 72
+}
+
+sorted(k_fold_model_score_dict.items(), key=lambda x:x[1])
+# ('GradientBoosting 모델', 62), 
+# ('Bagging 모델', 72), 
+# ('RandomForest 모델', 73), 
+# ('Ridge 모델', 107), 
+# ('2차항 회귀 모델', 113), 
+# ('AdaBoosting 모델', 122), 
+# ('선형 회귀 모델', 123), 
+# ('Lasso 모델', 159)
+
+# GradientBoosting 모델이 가장 성능이 좋음.
