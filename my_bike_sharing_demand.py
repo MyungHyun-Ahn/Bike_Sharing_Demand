@@ -66,6 +66,7 @@ plt.show()
 # windspeed에 0값이 많이 몰려있는 것을 확인 / humidity에도 0과 100 값이 몰려있는 것을 확인
 # 습도의 0과 100값을 삭제해야할까?
 
+# 지금은 일단 풍속의 0값을 삭제하고 추후에 예측 모델을 이용하여 0값도 예측하여 채워넣을 예정
 w_zero_values = X[X['windspeed'] == 0]
 w_zero_values
 
@@ -122,7 +123,7 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
 X_train.shape
 X_test.shape
 y_train.shape
-X_test.shape
+y_test.shape
 # 선형 회귀 모델 평균 제곱의 오차
 linear_m = LinearRegression()
 
@@ -137,7 +138,7 @@ linear_m_mse  # 124.33815857009867
 linear_m2 = LinearRegression()
 
 linear_m2_scores = cross_val_score(linear_m2, X, y, scoring="neg_mean_squared_error", cv=5)
-linear_m2_scores = np.sqrtsqrt(-1 * linear_m2_scores)
+linear_m2_scores = np.sqrt(-1 * linear_m2_scores)
 linear_m2_scores.mean()  # 123.61831320404738
 
 from sklearn.preprocessing import PolynomialFeatures
@@ -193,49 +194,3 @@ ridge_m2 = Ridge(alpha=0.01, max_iter=2000, normalize=True)
 ridge_m2_scores = cross_val_score(ridge_m2, poly_X, y, scoring="neg_mean_squared_error", cv=5)
 ridge_m2_scores = np.sqrt(-1 * ridge_m2_scores)
 ridge_m2_scores.mean() # 107.46983050400426
-
-
-# 블로그 보고 한 것 선형 회귀
-
-def rmsle(predicted_values, actual_values, convertExp=True):
-    if convertExp:
-        predicted_values = np.exp(predicted_values),
-        actual_values = np.exp(actual_values)
-    
-    predicted_values = np.array(predicted_values)
-    actual_values = np.array(actual_values)
-
-    log_predict = np.log(predicted_values + 1)
-    log_actual = np.log(actual_values + 1)
-
-    difference = log_predict - log_actual
-    difference = np.square(difference)
-
-    mean_difference = difference.mean()
-
-    score = np.sqrt(mean_difference)
-
-    return score
-
-from sklearn.model_selection import GridSearchCV
-from sklearn import metrics
-import warnings
-pd.options.mode.chained_assignment = None
-warnings.filterwarnings('ignore', category=DeprecationWarning)
-
-y_train_log = np.log1p(y)
-b_r_model = LinearRegression()
-
-b_r_model.fit(X, y_train_log)
-
-b_r_model_predict = b_r_model.predict(X)
-print('RMSLE Value For Linear Regression: ', rmsle(np.exp(y_train_log), np.exp(b_r_model_predict), False))
-
-from sklearn.ensemble import RandomForestRegressor
-rfModel = RandomForestRegressor(n_estimators=100)
-
-y_train_log = np.log1p(y)
-rfModel.fit(X,y_train_log.values.ravel())
-preds = rfModel.predict(X)
-score = rmsle(np.exp(y_train_log), np.exp(preds), False)
-print("RMSLE Value For Random Forest: ", score)
