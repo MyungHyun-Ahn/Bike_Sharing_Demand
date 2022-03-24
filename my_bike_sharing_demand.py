@@ -8,6 +8,7 @@ import numpy as np
 from math import sqrt
 
 TRAIN_FILE_PATH = 'data/train.csv'
+# datetime 컬럼을 datetime 타입으로 저장해주기 위해 parse_dates 파라미터를 사용
 X = pd.read_csv(TRAIN_FILE_PATH, parse_dates=['datetime'])
 
 X.info()
@@ -110,7 +111,7 @@ plt.figure(figsize=(20,30))
 sns.heatmap(X.corr(), annot=True)
 plt.show()
 
-# temp와 atemp 그리고 month 와 season 은 다중 공선성
+# temp와 atemp 그리고 month 와 season 은  높은 상관 관계를 가지기 때문에 다중 공선성을 보인다고 생각하고 한개씩 삭제
 
 X.drop(['atemp', 'month'], axis='columns', inplace=True)
 
@@ -118,7 +119,7 @@ X.drop(['atemp', 'month'], axis='columns', inplace=True)
 
 X.drop(['casual', 'registered'], axis='columns', inplace=True)
 
-# datetime 데이터는 년 월 날짜 시간으로 분류하여 저장하였기 때문에 삭제
+# datetime 데이터는 저장타입이 datetime이기도 하고 년 월 날짜 시간으로 분류하여 저장하였기 때문에 삭제
 X.drop('datetime', axis='columns', inplace=True)
 
 # y 데이터 프레임을 만들어서 target 변수인 'count' 컬럼을 만들어 넣어줌
@@ -281,6 +282,9 @@ BG_m2_scores = cross_val_score(BG_m2, X, y.values.ravel(), scoring="neg_mean_squ
 BG_m2_scores = np.sqrt(-1 * BG_m2_scores)
 BG_m2_scores.mean() # 72.99775759783618
 
+
+y.describe()
+
 rmse_model_score_dict = {
     '선형 회귀 모델' : 124,
     '2차항 회귀 모델' : 100,
@@ -291,7 +295,6 @@ rmse_model_score_dict = {
     'AdaBoosting 모델' : 116,
     'Bagging 모델' : 45
 }
-
 
 sorted(rmse_model_score_dict.items(), key=lambda x:x[1])
 # ('GradientBoosting 모델', 41), 
@@ -324,4 +327,4 @@ sorted(k_fold_model_score_dict.items(), key=lambda x:x[1])
 # ('선형 회귀 모델', 123), 
 # ('Lasso 모델', 159)
 
-# GradientBoosting 모델이 가장 성능이 좋음.
+# GradientBoosting 모델이 가장 성능이 좋음
