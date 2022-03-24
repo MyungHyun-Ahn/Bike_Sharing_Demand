@@ -153,16 +153,21 @@ linear_m_predict_y = linear_m.predict(X_test)
 
 linear_m_mse = sqrt(mean_squared_error(y_test, linear_m_predict_y))
 
-linear_m_mse  # 124.33815857009867
+linear_m_mse  
+# 124.33815857009867
+
 # 선형 회귀 모델 k-fold
 linear_m2 = LinearRegression()
 
 linear_m2_scores = cross_val_score(linear_m2, X, y, scoring="neg_mean_squared_error", cv=5)
 linear_m2_scores = np.sqrt(-1 * linear_m2_scores)
-linear_m2_scores.mean()  # 123.61831320404738
+linear_m2_scores.mean()  
+# 123.61831320404738
+
+# 다항 회귀 모델 준비
 
 from sklearn.preprocessing import PolynomialFeatures
-# 다항 회귀 모델 준비
+
 poly_trans = PolynomialFeatures(2)
 
 poly_data = poly_trans.fit_transform(X)
@@ -178,46 +183,61 @@ poly_m.fit(poly_X_train,poly_y_train)
 poly_y_test_predict = poly_m.predict(poly_X_test)
 poly_y_test_predict
 poly_mse = sqrt(mean_squared_error(poly_y_test, poly_y_test_predict))
-poly_mse # 100.93270051766473
+poly_mse 
+# 100.93270051766473
 
 # 다항 회귀 모델 k-fold
 poly_m2 = LinearRegression()
 
 poly_m2_scores = cross_val_score(poly_m2, poly_X, y, scoring="neg_mean_squared_error", cv=5)
 poly_m2_scores = np.sqrt(-1 * poly_m2_scores)
-poly_m2_scores.mean() # 113.6581596110982
+poly_m2_scores.mean() 
+# 113.6581596110982
 
 # L1 정규화를 위한 Lasso 모델
+
 from sklearn.linear_model import Lasso
+
 # Lasso 평균 제곱 오차
 lasso_m = Lasso(alpha=1, max_iter=2000, normalize=True)
 lasso_m.fit(poly_X_train, poly_y_train)
 lasso_y_test_predict = lasso_m.predict(poly_X_test)
 lasso_y_test_predict
 lasso_mse = sqrt(mean_squared_error(y_test, lasso_y_test_predict))
-lasso_mse # 157.59495896539266
+lasso_mse 
+# 157.59495896539266
+
 # Lasso k-fold
 lasso_m2 = Lasso(alpha=1, max_iter=2000, normalize=True)
 lasso_m2_scores = cross_val_score(lasso_m2, poly_X, y, scoring="neg_mean_squared_error", cv=5)
 lasso_m2_scores = np.sqrt(-1 * lasso_m2_scores)
-lasso_m2_scores.mean() # 159.61076851182779
+lasso_m2_scores.mean() 
+# 159.61076851182779
+
 # L2 정규화를 위한 Ridge 모델
+
 from sklearn.linear_model import Ridge
+
 # Ridge 평균 제곱 오차
 ridge_m = Ridge(alpha=0.01, max_iter=3000, normalize=True)
 ridge_m.fit(poly_X_train, poly_y_train)
 ridge_y_test_predict = lasso_m.predict(poly_X_test)
 ridge_y_test_predict
 ridge_mse = sqrt(mean_squared_error(y_test, ridge_y_test_predict))
-ridge_mse # 157.59495896539266
+ridge_mse 
+# 157.59495896539266
+
 # Ridge k-fold
 ridge_m2 = Ridge(alpha=0.01, max_iter=2000, normalize=True)
 ridge_m2_scores = cross_val_score(ridge_m2, poly_X, y, scoring="neg_mean_squared_error", cv=5)
 ridge_m2_scores = np.sqrt(-1 * ridge_m2_scores)
-ridge_m2_scores.mean() # 107.46983050400426
+ridge_m2_scores.mean() 
+# 107.46983050400426
 
 # 앙상블 모델
+
 # 그라디언트 부스트 모델
+
 from sklearn.ensemble import GradientBoostingRegressor
 
 # GradientBoosting 평균 제곱 오차
@@ -225,15 +245,18 @@ GB_m = GradientBoostingRegressor(n_estimators=4000, alpha=0.01)
 GB_m.fit(X_train, y_train.values.ravel())
 GB_y_test_predict = GB_m.predict(X_test)
 GB_mse = sqrt(mean_squared_error(y_test, GB_y_test_predict))
-GB_mse # 41.4939563124132
+GB_mse 
+# 41.4939563124132
 
 # GradientBoosting k-fold
 GB_m2 = GradientBoostingRegressor(n_estimators=4000, alpha=0.01)
 GB_m2_scores = cross_val_score(GB_m2, X, y.values.ravel(), scoring="neg_mean_squared_error", cv=5)
 GB_m2_scores = np.sqrt(-1 * GB_m2_scores)
-GB_m2_scores.mean() # 62.47338661764495
+GB_m2_scores.mean() 
+# 62.47338661764495
 
 # 랜덤 포레스트 모델
+
 from sklearn.ensemble import RandomForestRegressor
 
 # RandomForest 평균 제곱 오차
@@ -242,15 +265,18 @@ RF_m.fit(X_train, y_train.values.ravel())
 RF_y_test_predict = RF_m.predict(X_test)
 RF_y_test_predict
 RF_mse = sqrt(mean_squared_error(y_test, RF_y_test_predict))
-RF_mse # 43.493486694299925
+RF_mse 
+# 43.493486694299925
 
 # RandomForest k-fold
 RF_m2 = RandomForestRegressor(n_estimators=100)
 RF_m2_scores = cross_val_score(RF_m2, X, y.values.ravel(), scoring="neg_mean_squared_error", cv=5) 
 RF_m2_scores = np.sqrt(-1 * RF_m2_scores)
-RF_m2_scores.mean() # 73.21367394254486
+RF_m2_scores.mean()
+# 73.21367394254486
 
 # 에다부스트
+
 from sklearn.ensemble import AdaBoostRegressor
 
 # AdaBoosting 평균 제곱 오차
@@ -258,15 +284,18 @@ AB_m = AdaBoostRegressor(n_estimators=100)
 AB_m.fit(X_train, y_train)
 AB_y_test_predict = AB_m.predict(X_test)
 AB_mse = sqrt(mean_squared_error(y_test, AB_y_test_predict))
-AB_mse # 116.34704534569923
+AB_mse 
+# 116.34704534569923
 
 # AdaBoosting k-fold
 AB_m2 = AdaBoostRegressor(n_estimators=100)
 AB_m2_scores = cross_val_score(AB_m2, X, y.values.ravel(), scoring="neg_mean_squared_error", cv=5) 
 AB_m2_scores = np.sqrt(-1 * AB_m2_scores)
-AB_m2_scores.mean() # 122.89016076704408
+AB_m2_scores.mean() 
+# 122.89016076704408
 
 # 배깅 Bagging
+
 from sklearn.ensemble import BaggingRegressor
 
 # Bagging 평균 제곱 오차
@@ -274,13 +303,15 @@ BG_m = BaggingRegressor(n_estimators=100)
 BG_m.fit(X_train, y_train)
 BG_y_test_predict = BG_m.predict(X_test)
 BG_mse = sqrt(mean_squared_error(y_test, BG_y_test_predict))
-BG_mse # 45.717563391405406
+BG_mse 
+# 45.717563391405406
 
 # Bagging k-fold
 BG_m2 = BaggingRegressor(n_estimators=100)
 BG_m2_scores = cross_val_score(BG_m2, X, y.values.ravel(), scoring="neg_mean_squared_error", cv=5)
 BG_m2_scores = np.sqrt(-1 * BG_m2_scores)
-BG_m2_scores.mean() # 72.99775759783618
+BG_m2_scores.mean() 
+# 72.99775759783618
 
 
 y.describe()
@@ -328,3 +359,41 @@ sorted(k_fold_model_score_dict.items(), key=lambda x:x[1])
 # ('Lasso 모델', 159)
 
 # GradientBoosting 모델이 가장 성능이 좋음
+
+X.columns
+
+# ['season', 'holiday', 'workingday', 'weather', 'temp', 'humidity', 'windspeed', 'year', 'hour', 'dayofweek']
+# ['season', 'holiday', 'workingday', 'weather', 'temp', 'humidity', 'windspeed', 'year', 'hour', 'dayofweek']
+SUB_FILE_PATH = 'data/sampleSubmission.csv'
+sub = pd.read_csv(SUB_FILE_PATH)
+
+TEST_FILE_PATH ='data/test.csv'
+test = pd.read_csv(TEST_FILE_PATH, parse_dates=['datetime'])
+
+test.columns
+
+test['year'] = test['datetime'].dt.year
+test['hour'] = test['datetime'].dt.hour
+test['dayofweek'] = test['datetime'].dt.dayofweek
+
+test.drop(['datetime', 'atemp'], axis=1, inplace=True)
+
+
+
+GB_m3 = GradientBoostingRegressor(n_estimators=4000, alpha=0.01)
+GB_m3.fit(X, y.values.ravel())
+GB_m3_y_test_predict = GB_m3.predict(test)
+
+GB_m3_y_test_predict
+
+sub['count'] = GB_m3_y_test_predict
+
+sub.head()
+
+sub['count'] = sub['count'].apply(lambda x:0 if x<0 else x)
+sub['count']
+
+sub.to_csv("GradientBoosting_v0.1.csv",index = False)
+
+# Score 0.77242 2553등 쯤 3243명 중
+
