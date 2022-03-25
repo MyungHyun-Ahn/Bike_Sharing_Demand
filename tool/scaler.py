@@ -24,23 +24,28 @@ def Outscaler(df, columnsList):
 # x = (x - x(min))/(x(max)-x(min))
 
 def MMscaler(df, columnsList):
+    mms_df = df.copy()
     for name in columnsList:
         max = df[name].max()
         min = df[name].min()
         for i in range(df.shape[0]):
-            df.loc[i, name] = (df.loc[i, name] - min) / (max - min)
+            mms_df.loc[i, name] = (df.loc[i, name] - min) / (max - min)
+
+    return mms_df
 
 
 # Standard Scaler  
 # (Xi - (X평균)) / (X의 표준편차)
 
 def Stdscaler(df, columnsList):
+    std_df = df.copy()
     for name in columnsList:
         mean = df[name].mean()
         std = df[name].std()
         for i in range(df.shape[0]):
             std_scale = (df.loc[i, name] - mean) / std
-            df.loc[i, name] = std_scale
+            std_df.loc[i, name] = std_scale
+    return std_df
 
 
 
