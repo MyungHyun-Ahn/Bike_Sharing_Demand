@@ -9,7 +9,7 @@ import numpy as np
 import os
 
 from tool.scaler import *
-
+from tool.graph import *
 import warnings
 
 warnings.filterwarnings(action='ignore')
@@ -35,6 +35,10 @@ df['day'] = df['datetime'].dt.day
 df['hour'] = df['datetime'].dt.hour
 df['dayofweek'] = df['datetime'].dt.dayofweek
 
+# barplots 함수를 graph 모듈에 만들어 사용
+barplots(df, ['year', 'month', 'day', 'hour', 'dayofweek'], 'count')
+
+'''
 f, ax = plt.subplots(nrows=5, figsize=(10,10))
 sns.barplot(data=df, x='year', y='count', ax=ax[0])
 sns.barplot(data=df, x='month', y='count', ax=ax[1])
@@ -43,18 +47,22 @@ sns.barplot(data=df, x='hour', y='count', ax=ax[3])
 sns.barplot(data=df, x='dayofweek', y='count', ax=ax[4])
 ax[4].set_xticklabels(['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'])
 plt.show()
-
+'''
 # day feature 는 19일 까지 밖에 없고 고른 분포를 보이기 때문에 삭제
 df.drop('day', axis=1, inplace=True)
 
 df.columns
 
+# hue_pointplots 함수를 graph 모듈에 만들어 사용
+hue_pointplots(df, 'hour', 'count', ['season', 'holiday', 'workingday'])
+
+'''
 f, ax = plt.subplots(nrows=3, figsize=(10,10))
 sns.pointplot(data=df, y='count', x='hour', hue='season', ax=ax[0])
 sns.pointplot(data=df, y='count', x='hour', hue='holiday', ax=ax[1])
 sns.pointplot(data=df, y='count', x='hour', hue='workingday', ax=ax[2])
 plt.show()
-
+'''
 
 # 상관계수 확인을 위한 히트맵 그래프
 f = plt.figure(figsize=(10,10))
@@ -110,7 +118,7 @@ vif_n
 3   71.498267    month
 '''
 
-sns.pairplot(df[multicol], diag_kind='hist')
+sns.pairplot(df[['temp', 'atemp', 'season', 'month']], diag_kind='hist')
 plt.show()
 
 # 정규화는 다중공선성 문제를 해결하지 못했음..
@@ -125,12 +133,15 @@ df_n.head()
 # 남아있는 독립변수 ['datetime', 'season', 'holiday', 'workingday', 'weather', 'temp', 'humidity', 'windspeed', 'year', 'day', 'hour', 'dayofweek'] 중
 # 양적 변수 ['temp', 'humidity', 'windspeed'] 와 종속변수 count 사이의 산점도 그래프
 
+scatterplots(df_n, ['temp', 'humidity', 'windspeed'], 'count')
+'''
 f, ax = plt.subplots(nrows=3, figsize=(8,8))
 sns.scatterplot(data=df_n, x='temp', y='count',ax=ax[0])
 sns.scatterplot(data=df_n, x='humidity', y='count',ax=ax[1])
 sns.scatterplot(data=df_n, x='windspeed', y='count',ax=ax[2])
 plt.tight_layout()
 plt.show()
+'''
 
 # 온도는 고른 분포를 보이고 있음 그러나 습도와 풍속에 0값 100값이 들어가 있음
 # 이후 feature scaling 에서 처리 예정
