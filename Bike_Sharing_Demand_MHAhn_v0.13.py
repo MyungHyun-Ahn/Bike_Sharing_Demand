@@ -144,7 +144,7 @@ plt.show()
 '''
 
 # 온도는 고른 분포를 보이고 있음 그러나 습도와 풍속에 0값 100값이 들어가 있음
-# 이후 feature scaling 에서 처리 예정
+# 나중에 처리 예정
 
 # 먼저 범주형 데이터 One - Hot - encoding 진행 
 # ['season', 'holiday', 'workingday', 'weather', 'dayofweek']
@@ -153,6 +153,7 @@ one_hot_data = ['season', 'holiday', 'workingday', 'weather', 'dayofweek']
 
 for name in one_hot_data:
    df_n = pd.get_dummies(df_n, columns=[name])
+
 
 # 정규 분포 그리기
 f, ax = plt.subplots(nrows=3, figsize=(10,8))
@@ -190,3 +191,30 @@ print('왜도: {}, 첨도: {}'.format(df_n['log_count'].skew(), df_n['log_count'
 print('왜도: {}, 첨도: {}'.format(df_n['log_casual'].skew(), df_n['log_casual'].kurt()))  # 왜도: -0.22472252892408062, 첨도: -0.8696974993823288
 print('왜도: {}, 첨도: {}'.format(df_n['log_registered'].skew(), df_n['log_registered'].kurt()))  # 왜도: -0.8555617565369439, 첨도: -0.06995275735124729
 
+# 정규분포를 띄는지 시각화 비교
+# 조금 더 정규분포에 가까워 졌음
+
+from scipy import stats
+
+f = plt.figure(figsize=(10, 10))
+f.add_subplot(3, 2, 1)
+res = stats.probplot(df_n['count'], plot=plt)
+f.add_subplot(3, 2, 2)
+res = stats.probplot(df_n['log_count'], plot=plt)
+f.add_subplot(3, 2, 3)
+res = stats.probplot(df_n['casual'], plot=plt)
+f.add_subplot(3, 2, 4)
+res = stats.probplot(df_n['log_casual'], plot=plt)
+f.add_subplot(3, 2, 5)
+res = stats.probplot(df_n['registered'], plot=plt)
+f.add_subplot(3, 2, 6)
+res = stats.probplot(df_n['log_registered'], plot=plt)
+plt.tight_layout()
+plt.show()
+
+# 나머지 연속형 데이터의 첨도와 왜도를 확인
+
+df_n.columns
+print('왜도: {}, 첨도: {}'.format(df_n['temp'].skew(), df_n['temp'].kurt()))  # 왜도: 0.003690844422470916, 첨도: -0.9145302637630794
+print('왜도: {}, 첨도: {}'.format(df_n['humidity'].skew(), df_n['humidity'].kurt()))  # 왜도: -0.08633518364548581, 첨도: -0.7598175375208864
+print('왜도: {}, 첨도: {}'.format(df_n['windspeed'].skew(), df_n['windspeed'].kurt()))  # 왜도: 0.5887665265853944, 첨도: 0.6301328693364932
