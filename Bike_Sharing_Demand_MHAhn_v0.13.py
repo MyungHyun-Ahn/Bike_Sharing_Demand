@@ -67,6 +67,7 @@ plt.show()
 # 상관계수 확인을 위한 히트맵 그래프
 f = plt.figure(figsize=(10,10))
 sns.heatmap(data=df.corr(), annot=True)
+plt.tight_layout()
 plt.show()
 
 # temp와 atemp / registered 와 count / season 과 month 가 높은 상관 관계를 보임
@@ -322,6 +323,8 @@ for i in range(len(wind_pre_y)):
 # 풍속 0 값 처리 완료
 df_n.head(10)
 
+df['windspeed'].head(10)
+
 # windspeed 데이터가 연속적으로 채워짐
 
 '''
@@ -337,3 +340,23 @@ df_n.head(10)
 8 2011-01-01 08:00:00  0.224490        75  12.903327       1           7      8  2011  ...            0            0            0            1            0   2.197225    0.693147        2.079442
 9 2011-01-01 09:00:00  0.306122        76  14.309837       8           6     14  2011  ...            0            0            0            1            0   2.708050    2.197225        1.945910
 '''
+
+df_n['log_windspeed'] = np.log1p(df_n['windspeed'])
+
+f = plt.figure(figsize=(10, 10))
+ax1 = f.add_subplot(3, 1, 1)
+res = stats.probplot(df['windspeed'], plot=plt)
+ax1.set_title('Windspeed before prediction')
+
+ax2 = f.add_subplot(3, 1, 2)
+res = stats.probplot(df_n['windspeed'], plot=plt)
+ax2.set_title('Windspeed after prediction')
+
+ax3 = f.add_subplot(3, 1, 3)
+res = stats.probplot(df_n['log_windspeed'], plot=plt)
+ax3.set_title('After log scaling')
+
+plt.tight_layout()
+plt.show()
+
+df_n.to_csv('windspeed_predict.csv', index=False)
