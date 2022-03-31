@@ -10,15 +10,17 @@ __ALL__ = ['Outscaler', 'MMscaler', 'StdScaler']
 # 원하는 컬럼명 리스트를 받아와 Outlier Scaling
 # 이상치를 제거해주는 함수
 def Outscaler(df, columnsList):
+    out_df = df.copy()
     for name in columnsList:
-        q1 = df[name].quantile(0.25)
-        q3 = df[name].quantile(0.75)
+        q1 = out_df[name].quantile(0.25)
+        q3 = out_df[name].quantile(0.75)
 
         IQR = q3 - q1
 
-        outlier = (df[name] > (q3 + 1.5 * IQR)) | (df[name] < (q1 - 1.5 * IQR))
+        outlier = (out_df[name] > (q3 + 1.5 * IQR)) | (out_df[name] < (q1 - 1.5 * IQR))
 
-        df.drop(df[outlier].index, axis=0, inplace=True)
+        out_df.drop(out_df[outlier].index, axis=0, inplace=True)
+    return out_df
 
 # MinMax Scaler
 # x = (x - x(min))/(x(max)-x(min))
