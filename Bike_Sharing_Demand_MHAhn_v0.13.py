@@ -49,7 +49,7 @@ ax[4].set_xticklabels(['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'])
 plt.show()
 '''
 # day feature 는 19일 까지 밖에 없고 고른 분포를 보이기 때문에 삭제
-df.drop('day', axis=1, inplace=True)
+df.drop(['day', 'dayofweek'], axis=1, inplace=True)
 
 df.columns
 
